@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Chatbot - Computer Science Topics</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #eef2f7;
+      margin: 0;
+      padding: 0;
+    }
+    .chat-container {
+      width: 80%;
+      max-width: 800px;
+      margin: 30px auto;
+      background-color: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      padding: 20px;
+    }
+    .chat-box {
+      height: 400px;
+      overflow-y: scroll;
+      border: 1px solid #ccc;
+      padding: 10px;
+      border-radius: 8px;
+      background-color: #f9f9f9;
+    }
+    .user-message, .bot-message {
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 10px;
+      max-width: 75%;
+      line-height: 1.5;
+    }
+    .user-message {
+      background-color: #d1e7ff;
+      text-align: right;
+      margin-left: auto;
+    }
+    .bot-message {
+      background-color: #e2f0cb;
+      text-align: left;
+      margin-right: auto;
+    }
+    .input-box {
+      margin-top: 20px;
+      display: flex;
+    }
+    .input-box input {
+      flex: 1;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    .input-box button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #4a90e2;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      margin-left: 10px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<div class="chat-container">
+  <h2>Chatbot</h2>
+  <div class="chat-box" id="chatBox"></div>
+  <div class="input-box">
+    <input type="text" id="userInput" placeholder="Ask about AI, ML, DBMS, DSA...">
+    <button onclick="getResponse()">Send</button>
+  </div>
+</div>
+
+<script>
+const answers = {
+  greetings: {
+    answer: "Hello! How can I assist you with Computer Science topics today? You can ask me about topics like AI, ML, DBMS, DSA, CN, SE, or CL.",
+    keywords: ["hi", "hello", "hey", "greetings"]
+  },
+  farewell: {
+    answer: "Goodbye! Have a great day! Feel free to return with more questions.",
+    keywords: ["bye", "goodbye", "see you", "later"]
+  },
+  ai: {
+    answer: "Artificial Intelligence (AI) is the simulation of human intelligence processes by machines...",
+    advantages: ["Enhances productivity", "Improves accuracy", "Decision support", "24/7 availability", "Reduces errors"],
+    disadvantages: ["High cost", "Job loss", "Lack of empathy", "Bias issues", "Needs monitoring"],
+    future: "AI will integrate with robotics, space, medicine, and smart environments in a responsible and ethical way.",
+    examples: ["Google Assistant", "Tesla Autopilot", "Medical image AI", "Chatbots", "Product recommendations"]
+  },
+  ml: {
+    answer: "Machine Learning (ML) enables computers to learn from data without being explicitly programmed...",
+    advantages: ["Pattern detection", "Data-driven decisions", "Automation", "Adaptability", "Supports big data"],
+    disadvantages: ["Data dependency", "Bias risk", "Interpretability issues", "Expensive training", "Overfitting"],
+    future: "ML will evolve toward edge computing, explainable AI, and safer personalization for end-users.",
+    examples: ["Netflix recommendations", "Spotify mixes", "Spam filtering", "Stock prediction", "Voice recognition"]
+  },
+  dsa: {
+    answer: "Data Structures and Algorithms are essential for writing efficient code and solving complex problems...",
+    advantages: ["Improves performance", "Organized data", "Saves memory", "Scalable code", "Foundation for tech roles"],
+    disadvantages: ["Steep learning curve", "Hard to master", "Debugging complexity", "Time-intensive", "Not always intuitive"],
+    future: "Optimized DSA will continue to power AI, data science, and systems programming challenges.",
+    examples: ["Sorting algorithms", "Binary trees", "Graph traversal", "Database indexing", "Compression tools"]
+  },
+  dbms: {
+    answer: "Database Management Systems (DBMS) are software tools to manage and manipulate data efficiently...",
+    advantages: ["Centralized data", "Security control", "Data integrity", "Easy access", "Backup/recovery"],
+    disadvantages: ["Setup cost", "Complex admin", "Scalability issues", "Performance overhead", "Learning required"],
+    future: "Future DBMS will use AI, NoSQL, and distributed models for scalable cloud data solutions.",
+    examples: ["Banking systems", "Library software", "Inventory tools", "Hospital systems", "CRM databases"]
+  },
+  cn: {
+    answer: "Computer Networks enable device communication and data sharing over various mediums like LAN, WAN, and the internet...",
+    advantages: ["Resource sharing", "Remote access", "File sharing", "Cost saving", "Collaboration"],
+    disadvantages: ["Security risks", "Data breaches", "Maintenance", "Virus spread", "Hardware costs"],
+    future: "Networks will become smarter, faster, and more secure with AI-driven routing and 6G evolution.",
+    examples: ["WiFi", "Internet", "VPN", "LAN in schools", "Bluetooth communication"]
+  },
+  se: {
+    answer: "Software Engineering applies engineering principles to software development...",
+    advantages: ["Improves quality", "Ensures process", "Better project planning", "Reduces risk", "Enhances maintainability"],
+    disadvantages: ["Time-consuming", "Initial cost", "Requires skilled team", "Complexity", "Tool dependency"],
+    future: "Software engineering will be driven by automation, AI pair programming, and global DevOps practices.",
+    examples: ["Scrum-based dev", "Version control", "Agile models", "Testing tools", "Enterprise apps"]
+  },
+  cl: {
+    answer: "Computer Languages allow humans to communicate with computers via code to perform tasks...",
+    advantages: ["Automation", "Customization", "Cross-platform", "Large ecosystems", "Speed and flexibility"],
+    disadvantages: ["Syntax learning", "Debugging issues", "Security flaws", "Steep learning", "Platform limits"],
+    future: "Languages will evolve with more natural syntax, AI tools, and integration with quantum computing.",
+    examples: ["Python", "Java", "C++", "JavaScript", "SQL"]
+  }
+};
+
+function getResponse() {
+  const userText = document.getElementById("userInput").value.toLowerCase();
+  const chatBox = document.getElementById("chatBox");
+  
+  if (!userText) return;
+
+  // Append user message
+  const userMessage = `<div class='user-message'>${userText}</div>`;
+  chatBox.innerHTML += userMessage;
+
+  let topicKey = Object.keys(answers).find(key => {
+    if (answers[key].keywords) {
+      return answers[key].keywords.some(k => userText.includes(k));
+    }
+    return userText.includes(key);
+  });
+
+  if (topicKey) {
+    const data = answers[topicKey];
+    if (data.keywords) {
+      chatBox.innerHTML += `<div class='bot-message'>${data.answer}</div>`;
+    } else {
+      const botReply = `
+      <div class='bot-message'>
+        <strong>Answer:</strong><br>${data.answer}<br><br>
+        <strong>Advantages:</strong><ul>${data.advantages.map(a => `<li>${a}</li>`).join('')}</ul>
+        <strong>Disadvantages:</strong><ul>${data.disadvantages.map(d => `<li>${d}</li>`).join('')}</ul>
+        <strong>Future Scope:</strong><br>${data.future}<br><br>
+        <strong>Real-time Examples:</strong><ul>${data.examples.map(e => `<li>${e}</li>`).join('')}</ul>
+      </div>
+    `;
+    chatBox.innerHTML += botReply;
+  }
+  } else {
+    chatBox.innerHTML += `<div class='bot-message'>Sorry, I don't have information on that topic yet. Try asking about AI, ML, DBMS, DSA, CN, SE, or CL.</div>`;
+  }
+
+  document.getElementById("userInput").value = "";
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+</script>
+
+</body>
+</html>
